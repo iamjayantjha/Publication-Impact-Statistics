@@ -42,7 +42,7 @@ export default function ResearcherDetails() {
                 })
                 .catch((err) => {
                     console.error('Fetch Error:', err); // Debugging log
-                    setError('Failed to fetch researcher details');
+                    setError('Failed to fetch researcher details orcid is not available for this researcher');
                     setLoading(false);
                 });
         }
