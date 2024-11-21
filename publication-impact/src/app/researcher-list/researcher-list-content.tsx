@@ -10,7 +10,7 @@ type Researcher = {
     institution: string;
 };
 
-export default function ResearcherList() {
+export default function ResearcherListContent() {
     const searchParams = useSearchParams();
     const query = searchParams.get('query');
     const router = useRouter();
@@ -45,20 +45,17 @@ export default function ResearcherList() {
         <div className="p-6">
             <h1 className="text-3xl font-bold text-center mb-6">Researchers List</h1>
             {researchers.length === 0 ? (
-                <p className="text-center">No researchers found for "{query}"</p>
+                <p className="text-center">No researchers found for &quot;{query}&quot;</p>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {researchers.map((researcher, index) => (
                         <div
                             key={index}
                             className={`p-4 border border-gray-300 rounded-lg shadow ${
-                                researcher.orcid !== 'N/A'
-                                    ? 'cursor-pointer hover:shadow-md'
-                                    : 'opacity-50'
+                                researcher.orcid !== 'N/A' ? 'cursor-pointer hover:shadow-md' : 'opacity-50'
                             }`}
                             onClick={() => {
                                 if (researcher.orcid !== 'N/A') {
-                                    // Extract the ORCID identifier from the URL if it's a full URL
                                     const orcid = researcher.orcid.startsWith('http')
                                         ? researcher.orcid.split('/').pop()
                                         : researcher.orcid;
@@ -67,13 +64,7 @@ export default function ResearcherList() {
                                 }
                             }}
                         >
-                            <h2
-                                className={`text-lg font-bold ${
-                                    researcher.orcid !== 'N/A' ? 'text-blue-600' : 'text-gray-500'
-                                } mb-2`}
-                            >
-                                {researcher.name}
-                            </h2>
+                            <h2 className="text-lg font-bold text-blue-600 mb-2">{researcher.name}</h2>
                             <p className="text-sm text-gray-700">
                                 <strong>Institution:</strong>{' '}
                                 {researcher.institution !== 'N/A' ? researcher.institution : 'Not Available'}
