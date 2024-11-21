@@ -45,7 +45,7 @@ export default function ResearcherList() {
         <div className="p-6">
             <h1 className="text-3xl font-bold text-center mb-6">Researchers List</h1>
             {researchers.length === 0 ? (
-                <p className="text-center">No researchers found for "{query}"</p>
+                    <p className="text-center">No researchers found for &quot;{query}&quot;</p>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {researchers.map((researcher, index) => (
