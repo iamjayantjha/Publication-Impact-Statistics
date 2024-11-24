@@ -72,8 +72,6 @@ export async function GET(req: Request) {
 
         return NextResponse.json(researcherDetails, { status: 200 });
     } catch (error) {
-        // @ts-ignore
-        console.error('API Error:', error.response?.data || error.message || error);
         return NextResponse.json({ error: 'Failed to fetch researcher details' }, { status: 500 });
     }
 }
