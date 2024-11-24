@@ -12,7 +12,7 @@ type Researcher = {
 
 export default function ResearcherListContent() {
     const searchParams = useSearchParams();
-    const query = searchParams.get('query');
+    const query = searchParams.get('query')?.toLowerCase() || ''; // Convert query to lowercase for case-insensitive comparison
     const router = useRouter();
 
     const [researchers, setResearchers] = useState<Researcher[]>([]);
@@ -27,7 +27,11 @@ export default function ResearcherListContent() {
                     if (data.error) {
                         setError(data.error);
                     } else {
-                        setResearchers(data);
+                        // Filter researchers whose name matches the query
+                        const filteredResearchers = data.filter((researcher: Researcher) =>
+                            researcher.name.toLowerCase().includes(query)
+                        );
+                        setResearchers(filteredResearchers);
                     }
                     setLoading(false);
                 })
@@ -52,10 +56,12 @@ export default function ResearcherListContent() {
                         <div
                             key={index}
                             className={`p-4 border border-gray-300 rounded-lg shadow ${
-                                researcher.orcid !== 'N/A' ? 'cursor-pointer hover:shadow-md' : 'opacity-50'
+                                researcher.orcid !== 'ORCID not available'
+                                    ? 'cursor-pointer hover:shadow-md'
+                                    : 'opacity-50 cursor-not-allowed'
                             }`}
                             onClick={() => {
-                                if (researcher.orcid !== 'N/A') {
+                                if (researcher.orcid !== 'ORCID not available') {
                                     const orcid = researcher.orcid.startsWith('http')
                                         ? researcher.orcid.split('/').pop()
                                         : researcher.orcid;
@@ -64,14 +70,20 @@ export default function ResearcherListContent() {
                                 }
                             }}
                         >
-                            <h2 className="text-lg font-bold text-blue-600 mb-2">{researcher.name}</h2>
+                            <h2
+                                className={`text-lg font-bold ${
+                                    researcher.orcid !== 'ORCID not available' ? 'text-blue-600' : 'text-gray-500'
+                                } mb-2`}
+                            >
+                                {researcher.name}
+                            </h2>
                             <p className="text-sm text-gray-700">
                                 <strong>Institution:</strong>{' '}
                                 {researcher.institution !== 'N/A' ? researcher.institution : 'Not Available'}
                             </p>
                             <p className="text-sm text-gray-700">
                                 <strong>ORCID:</strong>{' '}
-                                {researcher.orcid !== 'N/A' ? researcher.orcid : 'Not Available'}
+                                {researcher.orcid !== 'ORCID not available' ? researcher.orcid : 'Not Available'}
                             </p>
                             {researcher.orcid === 'N/A' && (
                                 <p className="text-xs text-red-500">ORCID unavailable</p>

@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import axios from 'axios';
 
-// Define types for CrossRef API response structure
 type Author = {
     ORCID?: string;
     given?: string;
@@ -11,14 +10,21 @@ type Author = {
 
 type Paper = {
     title: string[];
-    is_referenced_by_count: number;
+    'is-referenced-by-count'?: number;
     published?: { 'date-parts'?: number[][] };
     author?: Author[];
+    'container-title'?: string[];
+    page?: string;
+    type?: string;
+    publisher?: string;
+    DOI?: string;
 };
 
 export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const orcid = searchParams.get('id'); // Extract ORCID from URL
+    const fallbackName = searchParams.get('name'); // Fallback name from query
+    const fallbackInstitution = searchParams.get('institution'); // Fallback institution from query
 
     if (!orcid) {
         return NextResponse.json({ error: 'ORCID is required' }, { status: 400 });
@@ -29,36 +35,45 @@ export async function GET(req: Request) {
             `https://api.crossref.org/works?filter=orcid:${orcid}`
         );
 
-        const items = response.data.message.items;
+        const items = response.data.message.items || [];
+        console.log('Crossref API Items:', items); // Debugging API Response
 
         if (items.length === 0) {
             return NextResponse.json({ error: 'No data found for this ORCID' }, { status: 404 });
         }
 
+        // Find the author matching the ORCID
         const author = items[0]?.author?.find(
-            (a: Author) => a.ORCID === `https://orcid.org/${orcid}`
+            (a: Author) => a.ORCID?.endsWith(orcid)
         );
 
-        const papers = items.map((item: Paper) => ({
-            title: item.title?.[0] || 'Untitled',
-            citations: item.is_referenced_by_count || 0,
-            year: item.published?.['date-parts']?.[0]?.[0] || 'Unknown',
-        }));
-
-        const totalCitations = papers.reduce((sum, paper) => sum + paper.citations, 0);
-
         const researcherDetails = {
-            name: author ? `${author.given || ''} ${author.family || ''}`.trim() : 'Name not available',
-            institution: author?.affiliation?.[0]?.name || 'Institution not available',
+            name: author
+                ? `${author.given || ''} ${author.family || ''}`.trim()
+                : fallbackName || 'Name not available',
+            institution: author?.affiliation?.[0]?.name || fallbackInstitution || 'Institution not available',
             orcid,
-            totalPapers: papers.length,
-            totalCitations,
-            papers,
+            totalPapers: items.length,
+            totalCitations: items.reduce((sum, paper) => sum + (paper['is-referenced-by-count'] || 0), 0),
+            papers: items.map((item) => ({
+                title: item.title?.[0] || 'Untitled',
+                citations: item['is-referenced-by-count'] || 0,
+                year: item.published?.['date-parts']?.[0]?.[0] || 'Unknown',
+                fullDate: item.published?.['date-parts']?.[0]?.join('-') || 'Date not available',
+                containerTitle: item['container-title']?.[0] || 'Container not available',
+                pages: item.page || 'Pages not available',
+                type: item.type || 'Type not available',
+                publisher: item.publisher || 'Publisher not available',
+                doi: item.DOI || 'DOI not available',
+            })),
         };
+
+        console.log('Researcher Details:', researcherDetails); // Debugging Output
 
         return NextResponse.json(researcherDetails, { status: 200 });
     } catch (error) {
-        console.error('API Error:', error);
+        // @ts-ignore
+        console.error('API Error:', error.response?.data || error.message || error);
         return NextResponse.json({ error: 'Failed to fetch researcher details' }, { status: 500 });
     }
 }

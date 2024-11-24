@@ -7,6 +7,12 @@ type Paper = {
     title: string;
     citations: number;
     year: string;
+    fullDate: string;
+    containerTitle: string;
+    pages: string;
+    type: string;
+    publisher: string;
+    doi: string;
 };
 
 type ResearcherDetails = {
@@ -84,8 +90,34 @@ export default function ResearcherDetails() {
                 <h2 className="text-xl font-bold mb-4">Papers</h2>
                 <ul>
                     {researcher.papers.map((paper, index) => (
-                        <li key={index} className="mb-2">
-                            <strong>{paper.title}</strong> ({paper.year}) - Citations: {paper.citations}
+                        <li key={index} className="mb-4 border p-4 rounded-lg shadow">
+                            <p>
+                                <strong>Title:</strong> {paper.title} ({paper.year})
+                            </p>
+                            <p>
+                                <strong>Citations:</strong> {paper.citations}
+                            </p>
+                            <p>
+                                <strong>Full Date:</strong> {paper.fullDate}
+                            </p>
+                            <p>
+                                <strong>Container:</strong> {paper.containerTitle}
+                            </p>
+                            <p>
+                                <strong>Pages:</strong> {paper.pages}
+                            </p>
+                            <p>
+                                <strong>Type:</strong> {paper.type}
+                            </p>
+                            <p>
+                                <strong>Publisher:</strong> {paper.publisher}
+                            </p>
+                            <p>
+                                <strong>DOI:</strong>{' '}
+                                <a href={`https://doi.org/${paper.doi}`} target="_blank" rel="noopener noreferrer" className="text-blue-500">
+                                    {paper.doi}
+                                </a>
+                            </p>
                         </li>
                     ))}
                 </ul>
